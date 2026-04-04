@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+codemagic.config.json
+codemagic.secrets.yaml
+codemagic.plains.secrets.yaml
+.codemagic/

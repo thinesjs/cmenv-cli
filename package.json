@@ -1,0 +1,35 @@
+{
+  "name": "cmenv",
+  "version": "0.1.0",
+  "description": "Sync environment variables from codemagic.plains.yaml to Codemagic",
+  "main": "dist/index.js",
+  "bin": {
+    "cmenv": "dist/index.js"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": ["codemagic", "ci-cd", "environment-variables"],
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.5",
+    "commander": "^12.0.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "js-yaml": "^4.1.0",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@types/js-yaml": "^4.0.9",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
