@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Sync environment variables from codemagic.plains.yaml to Codemagic all through CLI.",
   "main": "dist/index.js",
   "bin": {
@@ -31,7 +31,12 @@
     "test:watch": "vitest",
     "prepublishOnly": "pnpm build"
   },
-  "keywords": ["codemagic", "ci-cd", "environment-variables", "devops"],
+  "keywords": [
+    "codemagic",
+    "ci-cd",
+    "environment-variables",
+    "devops"
+  ],
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.5",
