@@ -7,13 +7,13 @@ Define your variable groups in `codemagic.plains.yaml`, keep secrets in a gitign
 ## Install
 
 ```bash
-npm install -g cmenv
+npm install -g @thinesjs/cmenv
 ```
 
 Or run directly:
 
 ```bash
-npx cmenv sync --dry-run
+npx @thinesjs/cmenv sync --dry-run
 ```
 
 ## Quick Start

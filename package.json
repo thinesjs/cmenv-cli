@@ -1,7 +1,10 @@
 {
-  "name": "cmenv",
-  "version": "0.1.0",
-  "description": "Sync environment variables from codemagic.plains.yaml to Codemagic",
+  "name": "@thinesjs/cmenv",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.0",
+  "description": "Sync environment variables from codemagic.plains.yaml to Codemagic all through CLI.",
   "main": "dist/index.js",
   "bin": {
     "cmenv": "dist/index.js"

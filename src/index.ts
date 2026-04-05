@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name("cmenv")
   .description("Sync environment variables from codemagic.plains.yaml to Codemagic")
-  .version("0.1.0");
+  .version("0.0.0");
 
 function addGlobalOptions(cmd: Command): Command {
   return cmd
