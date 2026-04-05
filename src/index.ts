@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { syncCommand } from "./commands/sync";
 import { listCommand } from "./commands/list";
 import { cleanCommand } from "./commands/clean";
+import { initCommand } from "./commands/init";
 
 const program = new Command();
 
@@ -47,5 +48,11 @@ addGlobalOptions(
     .option("--dry-run", "Preview deletions without applying", false)
     .option("--yes", "Confirm deletion", false)
 ).action(cleanCommand);
+
+program
+  .command("init")
+  .description("Initialize cmenv in the current directory")
+  .option("--force", "Overwrite existing files", false)
+  .action(initCommand);
 
 program.parse();
