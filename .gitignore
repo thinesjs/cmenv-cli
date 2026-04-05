@@ -5,3 +5,4 @@ codemagic.config.json
 codemagic.secrets.yaml
 codemagic.plains.secrets.yaml
 .codemagic/
+.DS_Store
