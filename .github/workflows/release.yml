@@ -1,32 +1,104 @@
-name: Release
+name: Release & Publish
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
 
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+      changelog: ${{ steps.changelog.outputs.body }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm type-check
+      - run: pnpm test
+
+      - name: Install commit-and-tag-version
+        run: pnpm add -g commit-and-tag-version
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run commit-and-tag-version
+        id: bump
+        run: |
+          if [ "${{ github.event.inputs.bump }}" = "auto" ]; then
+            commit-and-tag-version
+          else
+            commit-and-tag-version --release-as ${{ github.event.inputs.bump }}
+          fi
+
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog entry
+        id: changelog
+        run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "body<<$EOF" >> $GITHUB_OUTPUT
+          awk '/^## \['"${{ steps.bump.outputs.version }}"'\]/{found=1; next} /^## \[/{if(found) exit} found' CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+      - name: Push release
+        run: git push --follow-tags origin ${{ github.ref_name }}
+
   publish:
+    needs: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
+
       - run: pnpm install --frozen-lockfile
-      - run: pnpm type-check
-      - run: pnpm test
       - run: pnpm build
+
       - run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          tag_name: ${{ needs.release.outputs.tag }}
+          name: ${{ needs.release.outputs.tag }}
+          body: ${{ needs.release.outputs.changelog }}
