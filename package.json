@@ -6,6 +6,18 @@
   "bin": {
     "cmenv": "dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thinesjs/cmenv-cli-cli.git"
+  },
+  "homepage": "https://github.com/thinesjs/cmenv-cli",
+  "bugs": {
+    "url": "https://github.com/thinesjs/cmenv-cli/issues"
+  },
+  "author": "thinesjs",
   "packageManager": "pnpm@8.15.0",
   "scripts": {
     "build": "tsc",
@@ -13,9 +25,10 @@
     "start": "node dist/index.js",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
   },
-  "keywords": ["codemagic", "ci-cd", "environment-variables"],
+  "keywords": ["codemagic", "ci-cd", "environment-variables", "devops"],
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.5",
