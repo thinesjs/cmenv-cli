@@ -2,47 +2,39 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } fr
 import { join } from "path";
 import chalk from "chalk";
 
-const PLAINS_TEMPLATE = `groups:
+function generatePlainsTemplate(environments: string[]): string {
+  let yaml = `groups:
   global-vars:
     variables:
       - name: NODEJS_VERSION
         value: "22"
+`;
 
-  staging-vars:
+  for (const env of environments) {
+    const envLower = env.toLowerCase();
+    const envUpper = env.toUpperCase();
+    const envFile = `.env.${envLower}`;
+    const envVarName = `ENV_${envUpper}`;
+
+    yaml += `
+  ${envLower}-vars:
     secure: true
     variables:
       - name: BUILD_ENV
-        value: "staging"
+        value: "${envLower}"
       - name: BUNDLE_ID
-        value: "com.example.app.staging"
+        value: "com.example.app${envLower === environments[environments.length - 1] ? "" : "." + envLower}"
         secure: false
       - name: GOOGLE_SERVICES_JSON
-        file: staging/google-services.json
+        file: ${envLower}/google-services.json
       - name: GOOGLE_SERVICES_PLIST
-        file: staging/GoogleService-Info.plist
-      - name: ENV_STAGING
-        file: staging/.env.staging
+        file: ${envLower}/GoogleService-Info.plist
+      - name: ${envVarName}
+        file: ${envLower}/${envFile}
+`;
+  }
 
-  prod-vars:
-    secure: true
-    variables:
-      - name: BUILD_ENV
-        value: "production"
-      - name: BUNDLE_ID
-        value: "com.example.app"
-        secure: false
-      - name: PROD_BUILD_NUMBER
-        value: "1"
-        secure: false
-      - name: GOOGLE_SERVICES_JSON
-        file: production/google-services.json
-      - name: GOOGLE_SERVICES_PLIST
-        file: production/GoogleService-Info.plist
-      - name: ENV_PRODUCTION
-        file: production/.env.production
-      - name: FIREBASE_SERVICE_ACCOUNT
-        file_raw: credentials/firebase-service-account.json
-
+  yaml += `
   ios-global-vars:
     variables:
       - name: XCODE_VERSION
@@ -56,6 +48,9 @@ const PLAINS_TEMPLATE = `groups:
       - name: XCODE_SCHEME
         value: "MyApp"
 `;
+
+  return yaml;
+}
 
 const CONFIG_TEMPLATE = `{
   "api_key": "your-codemagic-api-key",
@@ -72,21 +67,29 @@ const GITIGNORE_ENTRIES = [
   ".codemagic/",
 ];
 
+const DEFAULT_ENVIRONMENTS = ["production"];
+
 interface InitCommandOptions {
   force: boolean;
+  environments?: string;
 }
 
 export function initCommand(options: InitCommandOptions): void {
   const cwd = process.cwd();
 
+  const environments = options.environments
+    ? options.environments.split(",").map((e) => e.trim()).filter(Boolean)
+    : DEFAULT_ENVIRONMENTS;
+
   console.log(chalk.cyan("\nInitializing cmenv...\n"));
+  console.log(chalk.gray(`  environments: ${environments.join(", ")}\n`));
 
   // codemagic.plains.yaml
   const plainsPath = join(cwd, "codemagic.plains.yaml");
   if (existsSync(plainsPath) && !options.force) {
     console.log(chalk.gray("  skip  codemagic.plains.yaml (exists)"));
   } else {
-    writeFileSync(plainsPath, PLAINS_TEMPLATE);
+    writeFileSync(plainsPath, generatePlainsTemplate(environments));
     console.log(chalk.green("  create  codemagic.plains.yaml"));
   }
 
@@ -101,8 +104,7 @@ export function initCommand(options: InitCommandOptions): void {
 
   // .codemagic/ directory
   const dirs = [
-    ".codemagic/staging",
-    ".codemagic/production",
+    ...environments.map((e) => `.codemagic/${e.toLowerCase()}`),
     ".codemagic/credentials",
   ];
   for (const dir of dirs) {

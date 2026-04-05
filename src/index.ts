@@ -53,6 +53,7 @@ program
   .command("init")
   .description("Initialize cmenv in the current directory")
   .option("--force", "Overwrite existing files", false)
+  .option("-e, --environments <envs>", "Comma-separated environments (default: staging,production)")
   .action(initCommand);
 
 program.parse();
